@@ -21,6 +21,26 @@ const giphyAPI =
 
 function setup() {
   noCanvas();
+  wordGiph()
+    .then(results =>  {
+      createP(results.word);
+      createImg(results.img);
+    })
+    .catch(err => console.log(err));
+}
+
+async function wordGiph() {
+  let response1 = await fetch(wordnikAPI);
+  let json1 = await response1.json();
+  let word = json1.word;
+  
+  let response2 = await fetch(giphyAPI + word);
+  let json2 = await response2.json();
+  let img_url = json2.data[0].images['fixed_height_small'].url;
+  
+  return {word: word, img: img_url};
+  
+  /*
   fetch(wordnikAPI)
     .then(response => {
       return response.json();
@@ -36,4 +56,5 @@ function setup() {
       createImg(json.data[0].images['fixed_height_small'].url);
     })
     .catch(err => console.log(err));
+    */
 }

@@ -15,12 +15,46 @@
 // Wordnik API Tutorial: https://youtu.be/YsgdUaOrFnQ
 
 const wordnikAPI =
-  'https://api.wordnik.com/v4/words.json/randomWord?&minLength=5&maxLength=-1&api_key=6hy0jc0xwp55m9mninzcmtaij9ux7quqphio1b06x0kpa0zfb';
+  'https://api.wordnik.com/v4/words.json/randomWord?&api_key=6hy0jc0xwp55m9mninzcmtaij9ux7quqphio1b06x0kpa0zfb';
 const giphyAPI =
   'https://api.giphy.com/v1/gifs/search?rating=PG&api_key=Xtr0PeyQ6O5xJ1ZWBWlp4SIzG4yDL5Qx&q=';
 
 function setup() {
   noCanvas();
+  let promises = [];
+  for( let i = 0; i < 7; i++) {
+    promises.push(wordGiph(i+3));
+  }
+  Promise.all(promises)
+    .then(results =>  {
+      results.forEach(result => {
+        createP(result.word);
+        if (result.img !== null) {
+          createImg(result.img);
+        }
+      })
+    })
+    .catch(err => console.log(err));
+}
+
+async function wordGiph(num) {
+  let response1 = await fetch(`${wordnikAPI}&minLength=${num}&maxLength=${num}`);
+  let json1 = await response1.json();
+  let word = json1.word;
+  
+  let response2 = await fetch(giphyAPI + word);
+  let json2 = await response2.json();
+  let img_url = null;
+  try {
+    img_url = json2.data[0].images['fixed_height_small'].url;
+  } catch(err) {
+    console.log('no image found for ' + word);
+    console.error(err);
+  }
+  
+  return {word: word, img: img_url};
+  
+  /*
   fetch(wordnikAPI)
     .then(response => {
       return response.json();
@@ -36,4 +70,5 @@ function setup() {
       createImg(json.data[0].images['fixed_height_small'].url);
     })
     .catch(err => console.log(err));
+    */
 }
